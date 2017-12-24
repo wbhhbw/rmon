@@ -14,9 +14,9 @@ class TestServerList:
         resp = client.get(url_for(self.endpoint))  # client用于发起请求
 
         # RestView 视图基类会设置 HTTP 头部 Content-Type 为 json
-        assert resp.headers['Content-Type'] = 'application/json;charset=utf-8'
+        assert resp.headers['Content-Type'] == 'application/json; charset=utf-8'
         # 访问成功后返回状态码 200 OK
-        assert resp.status_code = 200
+        assert resp.status_code == 200
 
         servers = resp.json
 
@@ -31,9 +31,33 @@ class TestServerList:
         assert 'created_at' in h
 
     def test_create_server_success(self, db, client):
-        """测试创建Redis服务器成功"""
-        # TUDO
-        pass
+        """测试创建Redis服务器成功
+        """
+
+        # 创建前，数据库中没有记录
+        assert Server.query.count() == 0
+        # 构建post请求，创建服务器
+        data = {
+            'name': 'test',
+            'description': 'this is a test record',
+            'host': '127.0.0.1'
+        }
+        headers = {
+            'Content-Type': 'application/json'
+        }
+        resp = client.post(url_for(self.endpoint),
+                           data=json.dumps(data), headers=headers)
+
+        # 创建成功返回状态码201
+        assert resp.status_code == 201
+        assert resp.json == {'ok':True}
+
+        # 写入数据库成功
+        assert Server.query.count() == 1
+        server = Server.query.first()
+        assert server is not None
+        for key in data:
+            assert getattr(server, key) == data[key]
 
     def test_create_server_failed_with_invalid_host(self, db, client):
         """无效的服务器地址导致创建Redis服务器失败"""

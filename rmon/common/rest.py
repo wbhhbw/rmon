@@ -5,6 +5,8 @@ from flask import request, make_response
 from flask.json import dumps
 from flask.views import MethodView
 
+from werkzeug.wrappers import Response
+
 
 class RestException(Exception):
     """异常基类
@@ -73,7 +75,7 @@ class RestView(MethodView):
             resp = self.handler_error(e)
 
         # 如果返回结果已经是HTTP响应，那么直接返回
-        if isinstance(resp, Reseponse):
+        if isinstance(resp, Response):
             return resp
 
         # 如果不是，那么需要解析HTTP响应
@@ -105,13 +107,12 @@ class RestView(MethodView):
         """解析视图方法返回值，视图方法的三个返回值分别为：响应字符串， 状态码，和由headers组成的字典
 
         """
-        headers ={}
+        headers = {}
         # 返回值只有响应字符串时，其类型不是tuple
         if not isinstance(value, tuple):
-        	return value, 200, {}
+            return value, 200, {}
         if len(value) == 3:
-        	data, code, headers = value
+            data, code, headers = value
         elif len(value) == 2:
-        	data, code = value
-        return data code, headers
-
+            data, code = value
+        return data, code, headers
