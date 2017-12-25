@@ -14,7 +14,8 @@ class TestServerList:
         resp = client.get(url_for(self.endpoint))  # client用于发起请求
 
         # RestView 视图基类会设置 HTTP 头部 Content-Type 为 json
-        assert resp.headers['Content-Type'] == 'application/json; charset=utf-8'
+        assert resp.headers[
+            'Content-Type'] == 'application/json; charset=utf-8'
         # 访问成功后返回状态码 200 OK
         assert resp.status_code == 200
 
@@ -50,7 +51,7 @@ class TestServerList:
 
         # 创建成功返回状态码201
         assert resp.status_code == 201
-        assert resp.json == {'ok':True}
+        assert resp.json == {'ok': True}
 
         # 写入数据库成功
         assert Server.query.count() == 1
@@ -61,7 +62,31 @@ class TestServerList:
 
     def test_create_server_failed_with_invalid_host(self, db, client):
         """无效的服务器地址导致创建Redis服务器失败"""
-        pass
+
+        # 创建前，数据库中没有记录
+        assert Server.query.count() == 0
+
+        # 传入无效的服务器地址
+        data = {
+            'name': 'test',
+            'description': 'this is a test record',
+            'host': '127.0.0.2'   # 无效服务器地址
+        }
+        headers = {
+            'Content-Type': 'application/json'
+        }
+        # 发起POST请求，创建服务器
+        resp = client.post(url_for(self.endpoint),
+                           data=json.dumps(data), headers=headers)
+
+         # 创建失败返回状态码201
+        assert resp.status_code == 400
+        # 验证相应信息
+        assert resp.json['ok'] == False
+        assert resp.json['message'] is not None
+
+        # 创建失败，数据库中依然没有记录
+        assert Server.query.count() == 0
 
     def test_create_server_failed_with_duplciate_server(self, server, client):
         """创建重复的服务器时将失败"""
