@@ -79,7 +79,7 @@ class TestServerList:
         resp = client.post(url_for(self.endpoint),
                            data=json.dumps(data), headers=headers)
 
-         # 创建失败返回状态码201
+        # 创建失败返回状态码201
         assert resp.status_code == 400
         # 验证相应信息
         assert resp.json['ok'] == False
@@ -89,8 +89,43 @@ class TestServerList:
         assert Server.query.count() == 0
 
     def test_create_server_failed_with_duplciate_server(self, server, client):
-        """创建重复的服务器时将失败"""
-        pass
+        """创建同名的服务器时将失败
+        """
+        resp = client.get(url_for(self.endpoint))  # get方法获取现有服务器列表
+
+        # RestView 视图基类会设置 HTTP 头部 Content-Type 为 json
+        assert resp.headers[
+            'Content-Type'] == 'application/json; charset=utf-8'
+        # 访问成功后返回状态码 200 OK
+        assert resp.status_code == 200
+
+        servers = resp.json
+
+        # 由于当前测试环境中只有一个 Redis 服务器，所以返回的数量为 1
+        assert len(servers) == 1
+
+        data = {
+            'name': server.name,  # 重复地址
+            'description': 'this is a another test record',
+            'host': server.host
+        }
+        headers = {
+            'Content-Type': 'application/json'
+        }
+
+        # Post方法创建同名服务器
+        resp = client.post(url_for(self.endpoint),
+                           data=json.dumps(data), headers=headers)
+
+        # 创建失败返回状态码400
+        assert resp.status_code == 400
+
+        # 验证相应信息
+        assert resp.json['ok'] == False
+        assert resp.json['message'] == 'Redis server alredy exist'
+
+        # 创建失败，数据库中依然没有记录
+        assert Server.query.count() == 1
 
 
 class TestServerDetail:
