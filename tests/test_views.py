@@ -91,18 +91,9 @@ class TestServerList:
     def test_create_server_failed_with_duplciate_server(self, server, client):
         """创建同名的服务器时将失败
         """
-        resp = client.get(url_for(self.endpoint))  # get方法获取现有服务器列表
 
-        # RestView 视图基类会设置 HTTP 头部 Content-Type 为 json
-        assert resp.headers[
-            'Content-Type'] == 'application/json; charset=utf-8'
-        # 访问成功后返回状态码 200 OK
-        assert resp.status_code == 200
-
-        servers = resp.json
-
-        # 由于当前测试环境中只有一个 Redis 服务器，所以返回的数量为 1
-        assert len(servers) == 1
+        # 由于当前测试环境中只有一个 Redis 服务器，所以查询服务器的个数为1
+        assert Server.query.count() == 1
 
         data = {
             'name': server.name,  # 重复地址
@@ -124,7 +115,7 @@ class TestServerList:
         assert resp.json['ok'] == False
         assert resp.json['message'] == 'Redis server alredy exist'
 
-        # 创建失败，数据库中依然没有记录
+        # 创建失败，数据库中仍然只有一条记录
         assert Server.query.count() == 1
 
 
@@ -136,7 +127,30 @@ class TestServerDetail:
     def test_get_server_success(self, server, client):
         """测试获取Redis服务器详情
         """
-        pass
+        # 由于当前测试环境中只有一个 Redis 服务器，所以查询服务器的个数为1
+        assert Server.query.count() == 1
+
+        # 发起get请求获取服务器详情, 注意此处的url_for函数要传入两个参数
+        resp = client.get(url_for(self.endpoint, object_id=server.id))
+
+        # 确保RestView 视图基类已经设置 HTTP 头部 Content-Type 正确的设置为 json
+        assert resp.headers[
+            'Content-Type'] == 'application/json; charset=utf-8'
+
+        # 访问成功后返回状态码 200 OK
+        assert resp.status_code == 200
+
+        h = resp.json
+        assert h['name'] == server.name
+        assert h['description'] == server.description
+        assert h['host'] == server.host
+        assert h['port'] == server.port
+        assert 'updated_at' in h
+        assert 'created_at' in h
+
+        # 查询操作不改变服务器列表，查询服务器仍为server
+        assert Server.query.first() == server
+
 
     def test_get_server_failed(self, db, client):
         """获取不存在的Redis服务器详情失败

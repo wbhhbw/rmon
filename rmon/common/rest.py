@@ -65,9 +65,9 @@ class RestView(MethodView):
         else:
             decorators = self.method_decorators
 
-        # 首先执行装饰器函数
+        # 首先执行装饰器函数,如果decorators为[],那么这段代码什么也不做，method还是原来的方法
         for decorator in decorators:
-            method = decorators(method)
+            method = decorator(method)
 
         try:
             resp = method(*args, **kwargs)

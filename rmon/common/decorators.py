@@ -14,7 +14,7 @@ class ObjectMustBeExist:
         """
         self.object_class = object_class
 
-    def __call__(self, func):
+    def __call__(self, func):  # __call__方法可以让一个类的实例(如obj)，像函数那样调用obj(func)
         """装饰器实现
         """
         @wraps(func)
