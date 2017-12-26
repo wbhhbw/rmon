@@ -64,7 +64,7 @@ class TestServerList:
         """无效的服务器地址导致创建Redis服务器失败"""
 
         # 创建前，数据库中没有记录
-        assert Server.query.count() == 0
+        assert db.session.query(Server).count() == 0
 
         # 传入无效的服务器地址
         data = {
@@ -151,11 +151,10 @@ class TestServerDetail:
         # 查询操作不改变服务器列表，查询服务器仍为server
         assert Server.query.first() == server
 
-
     def test_get_server_failed(self, db, client):
         """获取不存在的Redis服务器详情失败
         """
-         # 发起get请求获取服务器详情, 该数据库模型id不存在
+        # 发起get请求获取服务器详情, 该数据库模型id不存在
         resp = client.get(url_for(self.endpoint, object_id=3))
 
         # 返回的结果为 json格式
@@ -169,11 +168,39 @@ class TestServerDetail:
         assert resp.json['ok'] == False
         assert resp.json['message'] == 'object not exist'
 
-
     def test_update_server_success(self, server, client):
         """更新Redis服务器成功
         """
-        pass
+        # 由于当前测试环境中只有一个 Redis 服务器，所以查询服务器的个数为1
+        assert Server.query.first() == server
+
+        data = {
+            'name': server.name,  # 重复名称表明是更新服务器
+            'description': 'I have changed the description'  # 更新描述
+        }
+        headers = {
+            'Content-Type': 'application/json'
+        }
+
+        # HTTP put方法更新同名服务器
+        resp = client.put(url_for(self.endpoint, object_id=server.id),
+                          data=json.dumps(data), headers=headers)
+
+        # 访问成功后返回状态码 200 OK
+        assert resp.status_code == 200
+
+        # 验证相应信息
+        assert resp.json['ok'] == True
+
+        # 更新操作不改变服务器列表，查询服务器数量仍为1
+        assert Server.query.count() == 1
+
+        # 验证数据库中字段已经更改
+        server_new = Server.query.first()
+        assert server_new.description == 'I have changed the description'
+        assert server_new.id == server.id
+        assert server_new.name == server.name
+        assert server_new.host == server.host
 
     def test_update_server_failed_with_duplicate_server(self, server, client):
         """更新服务器名称为其他同名服务器名称时失败

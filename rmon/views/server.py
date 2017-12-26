@@ -37,15 +37,15 @@ class ServerDetail(RestView):
         return data
 
     def put(self, object_id):
-    	"""更新服务器
-    	"""
-    	schema = ServerSchema(context={'instance':g.instance})
-    	data = request.get_json()
-    	server, errors = schema.load(data, partial=True)
-    	if errors:
-    		return errors, 400
-    	server.save()
-    	return {'ok': True}
+        """更新服务器
+        """
+        schema = ServerSchema(context={'instance': g.instance})
+        data = request.get_json()
+        server, errors = schema.load(data, partial=True)
+        if errors:
+            return errors, 400
+        server.save()
+        return {'ok': True}
 
     def delete(self, object_id):
         """删除服务器

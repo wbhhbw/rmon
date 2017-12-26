@@ -17,7 +17,7 @@ def db(app):
 
 	with app.app_context():
 		database.create_all()
-		yield db 
+		yield database 
 		database.drop_all()
 
 @pytest.fixture
