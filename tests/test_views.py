@@ -133,7 +133,7 @@ class TestServerDetail:
         # 发起get请求获取服务器详情, 注意此处的url_for函数要传入两个参数
         resp = client.get(url_for(self.endpoint, object_id=server.id))
 
-        # 确保RestView 视图基类已经设置 HTTP 头部 Content-Type 正确的设置为 json
+        # 返回的结果为 json格式
         assert resp.headers[
             'Content-Type'] == 'application/json; charset=utf-8'
 
@@ -155,7 +155,20 @@ class TestServerDetail:
     def test_get_server_failed(self, db, client):
         """获取不存在的Redis服务器详情失败
         """
-        pass
+         # 发起get请求获取服务器详情, 该数据库模型id不存在
+        resp = client.get(url_for(self.endpoint, object_id=3))
+
+        # 返回的结果为 json格式
+        assert resp.headers[
+            'Content-Type'] == 'application/json; charset=utf-8'
+
+        # 访问失败，状态码为404
+        assert resp.status_code == 404
+
+        # 验证相应信息
+        assert resp.json['ok'] == False
+        assert resp.json['message'] == 'object not exist'
+
 
     def test_update_server_success(self, server, client):
         """更新Redis服务器成功
