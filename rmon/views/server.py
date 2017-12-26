@@ -53,3 +53,14 @@ class ServerDetail(RestView):
         """
         g.instance.delete()
         return {'ok': True}, 204
+
+class ServerMetrics(RestView):
+    """服务器监控信息
+    """
+    method_decorators = (ObjectMustBeExist(Server),)  # 装饰器类实例化传入Server对象, 该装饰其保证对象存在
+
+    def get(self, object_id):
+        """获取服务器监控信息
+        """
+        return g.instance.get_metrics()
+        

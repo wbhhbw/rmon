@@ -270,3 +270,45 @@ class TestServerDetail:
 
         # 数据库中没有记录
         assert Server.query.count() == 0
+
+
+class TestServerMetrics:
+    """测试获取服务器INFO  API"""
+
+    endpoint = 'api.server_metrics'
+
+    def test_get_server_info_success(self, server, client):
+        """获取服务器INFO成功"""
+
+        # 数据库中有一条记录
+        assert Server.query.first() == server
+
+        # 发起get请求获取服务器INFO
+        resp = client.get(url_for(self.endpoint, object_id=server.id))
+
+        # 获取成功后返回状态码 200 OK
+        assert resp.status_code == 200
+        # 获取成功得到INFO信息
+        assert len(resp.json) > 0
+
+        # 数据库中仍为原记录
+        assert Server.query.first() == server
+
+    def test_get_server_info_failed_with_server_not_exist(self, db, client):
+        """获取不存在的服务器INFO失败"""
+
+        # 数据库中没有记录
+        assert Server.query.count() == 0
+
+        # 发起get请求获取服务器INFO，object_id不存在
+        resp = client.get(url_for(self.endpoint, object_id=100))
+
+        # 对象不存在，状态码为404
+        assert resp.status_code == 404
+
+        # 验证错误信息
+        assert resp.json == {'ok': False,
+                             'message': 'object not exist'}
+
+        # 数据库中没有记录
+        assert Server.query.count() == 0
