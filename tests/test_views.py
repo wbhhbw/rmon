@@ -175,7 +175,7 @@ class TestServerDetail:
         assert Server.query.first() == server
 
         data = {
-            'name': server.name,  # 重复名称表明是更新服务器
+            'name': server.name,  # 更新server记录，这个字段必须加上，否则无法判断是否重名
             'description': 'I have changed the description'  # 更新描述
         }
         headers = {
@@ -203,16 +203,70 @@ class TestServerDetail:
         assert server_new.host == server.host
 
     def test_update_server_failed_with_duplicate_server(self, server, client):
-        """更新服务器名称为其他同名服务器名称时失败
+        """更新服务器名称为其他同名服务器名称时失败:
+           假设要更新server的name字段，但是更改的时候改成了和second_server 同名报错
         """
-        pass
+
+        # 数据库中有一条记录
+        assert Server.query.first() == server
+
+        # 创建second_server
+        second_server = Server(name='second_server',
+                               host='192.168.0.1', port=6379)
+        second_server.save()
+
+        # 数据库中有两条记录
+        assert Server.query.count() == 2
+
+        data = {
+            'name': second_server.name,  # 更新名字，与另一记录重复
+            'description': 'I have changed the description'  # 更新描述
+        }
+        headers = {
+            'Content-Type': 'application/json'
+        }
+
+        # HTTP put方法更新sever服务器，并与second_server同名
+        resp = client.put(url_for(self.endpoint, object_id=server.id),
+                          data=json.dumps(data), headers=headers)
+
+        # 更新失败，状态码为400
+        assert resp.status_code == 400
+
+        # 验证错误信息
+        assert resp.json == {'ok': False,
+                             'message': 'Redis server alredy exist'}
 
     def test_delete_success(self, server, client):
         """删除Redis服务器成功
         """
-        pass
+        # 数据库中有一条记录
+        assert Server.query.first() == server
+
+        # HTTP delete方法删除server服务器
+        resp = client.delete(url_for(self.endpoint, object_id=server.id))
+
+        # 访问成功后返回状态码 204
+        assert resp.status_code == 204
+
+        # 数据库中没有记录
+        assert Server.query.count() == 0
 
     def test_delete_failed_with_host_not_exist(self, db, client):
         """删除不存在的Redis服务器失败
         """
-        pass
+        # 数据库中没有记录
+        assert Server.query.count() == 0
+
+        # HTTP delete方法删除server服务器
+        resp = client.delete(url_for(self.endpoint, object_id=10))
+
+        # 对象不存在，状态码为404
+        assert resp.status_code == 404
+
+        # 验证错误信息
+        assert resp.json == {'ok': False,
+                             'message': 'object not exist'}
+
+        # 数据库中没有记录
+        assert Server.query.count() == 0

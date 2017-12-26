@@ -39,7 +39,8 @@ class ServerDetail(RestView):
     def put(self, object_id):
         """更新服务器
         """
-        schema = ServerSchema(context={'instance': g.instance})
+        schema = ServerSchema(
+            context={'instance': g.instance})  # g.instance 来自于装饰器的get(object_id)
         data = request.get_json()
         server, errors = schema.load(data, partial=True)
         if errors:

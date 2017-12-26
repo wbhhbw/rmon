@@ -97,7 +97,7 @@ class ServerSchema(Schema):
         if server is None:
             return
 
-        # 更新服务器时：如果上下文中已经存在Server对象，说明是更新操作，但是要更新的server对象不存在时，抛出错误
+        # 更新服务器时：如果上下文中已经存在Server对象，说明是更新操作，但是要更新的server对象与data查询到的对象不一致时，抛出错误，也即更新为另一个同名server。
         if instance is not None and server != instance:
             raise ValidationError('Redis server alredy exist', 'name')
 
@@ -116,4 +116,4 @@ class ServerSchema(Schema):
         # 更新服务器
         for key in data:
             setattr(instance, key, data[key])
-            return instance
+        return instance

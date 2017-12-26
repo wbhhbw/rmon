@@ -81,7 +81,7 @@ class RestView(MethodView):
         # 如果不是，那么需要解析HTTP响应
         data, code, headers = RestView.unpack(resp)
 
-        # 处理错误，HTTP 状态码大于 400 时认为是错误
+        # 处理错误，HTTP 状态码大于等于 400 时认为是错误
         # 返回的错误类似于 {'name': ['redis server already exist']} 将其调整为
         # {'ok': False, 'message': 'redis server already exist'}
         if code >= 400 and isinstance(data, dict):
