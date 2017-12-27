@@ -144,10 +144,10 @@ class User(BaseModel):
         """
         return cls.query.filter_by(wx_id=wx_id).first()
 
-class UserSchema(Schema):
-	"""用户序列化类
 
-	TUDO
-	"""
-	pass
-		
+class UserSchema(Schema):
+    """用户序列化类
+
+    TUDO
+    """
+    pass
