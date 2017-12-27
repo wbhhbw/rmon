@@ -63,4 +63,3 @@ class ServerMetrics(RestView):
         """获取服务器监控信息
         """
         return g.instance.get_metrics()
-        

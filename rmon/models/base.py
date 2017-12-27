@@ -1,5 +1,5 @@
 from datetime import datetime
-from rmon.models import db
+from rmon.models.models import db
 
 
 class BaseModel(db.model):
