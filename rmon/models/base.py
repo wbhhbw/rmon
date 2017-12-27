@@ -1,8 +1,8 @@
 from datetime import datetime
-from rmon.models.models import db
+from rmon.extensions import db
 
 
-class BaseModel(db.model):
+class BaseModel(db.Model):
     """模型抽象基础类
     通过设置__abstract__属性，成为SQLAlchemy 抽象基类， 不再映射到数据库中
     """

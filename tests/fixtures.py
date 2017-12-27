@@ -2,7 +2,7 @@ import pytest
 
 from rmon.app import create_app
 from rmon.models import Server
-from rmon.models import db as database
+from rmon.extensions import db as database
 
 @pytest.fixture
 def app():

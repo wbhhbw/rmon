@@ -5,7 +5,7 @@ import os
 from flask import Flask
 
 from rmon.config import DevConfig, ProductConfig
-from rmon.models import db
+from rmon.extensions import db
 from rmon.views import api
 
 def create_app():

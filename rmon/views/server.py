@@ -2,7 +2,7 @@ from flask import request, g
 
 from rmon.common.rest import RestView
 from rmon.common.decorators import ObjectMustBeExist
-from rmon.models import Server, ServerSchema
+from rmon.models.server import Server, ServerSchema
 
 
 class ServerList(RestView):

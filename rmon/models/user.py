@@ -1,9 +1,15 @@
+"""rmon.models.user
+该模块实现了User类以及相应的序列化类
+"""
 from .base import BaseModel
-from rmon.models.models import db
+from rmon.extensions import db
+from rmon.common.errors import InvalidTokenError, AuthenticationError
 from werkzeug import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
 from calendar import timegm
 import jwt
+from marshmallow import (Schema, fields, validate,
+                         post_load, validates_schema, ValidationError)
 
 
 class User(BaseModel):
@@ -137,3 +143,11 @@ class User(BaseModel):
         """根据 wx_id获取用户
         """
         return cls.query.filter_by(wx_id=wx_id).first()
+
+class UserSchema(Schema):
+	"""用户序列化类
+
+	TUDO
+	"""
+	pass
+		

@@ -2,7 +2,7 @@
 应用程序入口文件
 """
 from rmon.app import create_app
-from rmon.models import db
+from rmon.extensions import db
 
 app = create_app()
 
