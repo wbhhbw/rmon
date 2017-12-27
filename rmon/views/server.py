@@ -28,7 +28,7 @@ class ServerList(RestView):
 class ServerDetail(RestView):
     """Redis 服务器详情
     """
-    method_decorators = (ObjectMustBeExist(Server), TokenAuthenticate(server))  # 装饰器类实例化传入Server对象
+    method_decorators = (ObjectMustBeExist(Server), TokenAuthenticate())  # 装饰器类实例化传入Server对象
 
     def get(self, object_id):
         """获取服务器详情

@@ -4,24 +4,9 @@ from collections import Mapping
 from flask import request, make_response
 from flask.json import dumps
 from flask.views import MethodView
+from rmon.common.errors import RestError
 
 from werkzeug.wrappers import Response
-
-
-class RestException(Exception):
-    """异常基类
-    """
-
-    def __init__(self, code, message):
-        """初始化异常
-
-        Args:
-                code(int): http状态码
-                message(str): 错误信息
-        """
-        self.code = code
-        self.message = message
-        super().__init__()
 
 
 class RestView(MethodView):
@@ -71,7 +56,7 @@ class RestView(MethodView):
 
         try:
             resp = method(*args, **kwargs)
-        except RestException as e:
+        except RestError as e:
             resp = self.handler_error(e)
 
         # 如果返回结果已经是HTTP响应，那么直接返回
